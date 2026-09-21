@@ -1,73 +1,90 @@
 // =====================================================
 // TREE VIEW URJAB DJPK
-// Data berasal dari Google Sheets
+// Google Sheets CSV → GitHub Pages
+// =====================================================
 
 const DATA_URL =
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRnqIAvEqNOyIMtJAe3gbqKWF8eJe_LSDZOJtSfloFLLv4rkGPyx6Lc1AQEazEV-ZmpR6MJ7dNdfs4J/pub?output=csv";
 
-
-// =====================================================
-// 3. SAAT WEBSITE DIBUKA
-// =====================================================
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    loadData();
-
-});
+document.addEventListener("DOMContentLoaded", loadData);
 
 
 // =====================================================
-// 4. MEMBACA DATA GOOGLE SHEET
+// LOAD DATA
 // =====================================================
 
 async function loadData() {
 
     const container = document.getElementById("treeContainer");
 
-    container.innerHTML =
-        '<div class="loading">Memuat data dari Google Sheets...</div>';
+    container.innerHTML = `
+        <div class="loading">
+            ⏳ Memuat data dari Google Sheets...
+        </div>
+    `;
 
     try {
 
         const response = await fetch(DATA_URL);
 
         if (!response.ok) {
-            throw new Error("Data Google Sheet tidak dapat diakses.");
+            throw new Error(
+                "Google Sheets tidak dapat diakses."
+            );
         }
 
         const csvText = await response.text();
 
+        console.log("CSV berhasil diambil:");
+        console.log(csvText);
+
         const data = parseCSV(csvText);
+
+        console.log("Jumlah data:", data.length);
+        console.log(data);
+
+        if (data.length === 0) {
+            throw new Error("Data Google Sheet kosong.");
+        }
 
         renderTree(data);
 
-    }
+    } catch (error) {
 
-    catch (error) {
-
-        console.error(error);
+        console.error("ERROR:", error);
 
         container.innerHTML = `
             <div class="error">
-                <strong>Data tidak dapat dimuat.</strong>
-                <br><br>
-                Pastikan Google Sheet sudah:
-                <ul>
-                    <li>Dipublish ke web</li>
-                    <li>Menggunakan nama sheet: URJAB</li>
-                    <li>Spreadsheet ID sudah benar di script.js</li>
-                </ul>
+                <strong>❌ Data tidak dapat dimuat.</strong>
+
+                <p>
+                    Penyebab:
+                    ${escapeHTML(error.message)}
+                </p>
+
+                <hr>
+
+                <p>
+                    Pastikan Google Sheet sudah
+                    <strong>Publish to web</strong>
+                    dan menggunakan format CSV.
+                </p>
+
+                <p>
+                    URL sumber data:
+                </p>
+
+                <small>
+                    Google Sheets CSV
+                </small>
             </div>
         `;
-
     }
-
 }
 
 
 // =====================================================
-// 5. MEMBACA CSV
+// CSV PARSER
 // =====================================================
 
 function parseCSV(text) {
@@ -75,183 +92,155 @@ function parseCSV(text) {
     const rows = [];
 
     let row = [];
-
     let value = "";
-
     let insideQuotes = false;
-
 
     for (let i = 0; i < text.length; i++) {
 
         const char = text[i];
-
         const nextChar = text[i + 1];
 
-
-        if (char === '"' && insideQuotes && nextChar === '"') {
+        if (
+            char === '"' &&
+            insideQuotes &&
+            nextChar === '"'
+        ) {
 
             value += '"';
-
             i++;
 
-        }
-
-        else if (char === '"') {
+        } else if (char === '"') {
 
             insideQuotes = !insideQuotes;
 
-        }
-
-        else if (char === "," && !insideQuotes) {
+        } else if (
+            char === "," &&
+            !insideQuotes
+        ) {
 
             row.push(value);
-
             value = "";
 
-        }
-
-        else if (
+        } else if (
             (char === "\n" || char === "\r") &&
             !insideQuotes
         ) {
 
-            if (char === "\r" && nextChar === "\n") {
+            if (
+                char === "\r" &&
+                nextChar === "\n"
+            ) {
                 i++;
             }
 
             row.push(value);
 
-            rows.push(row);
+            if (row.length > 0) {
+                rows.push(row);
+            }
 
             row = [];
-
             value = "";
 
-        }
-
-        else {
+        } else {
 
             value += char;
-
         }
-
     }
-
 
     if (value !== "" || row.length > 0) {
 
         row.push(value);
-
         rows.push(row);
-
     }
-
 
     if (rows.length === 0) {
         return [];
     }
 
-
-    const headers = rows[0].map(header =>
-        header.trim()
+    const headers = rows[0].map(
+        header => header.trim()
     );
-
 
     return rows
         .slice(1)
-        .filter(row => row.some(value => value.trim() !== ""))
+        .filter(row =>
+            row.some(
+                value =>
+                    String(value).trim() !== ""
+            )
+        )
         .map(row => {
 
             const object = {};
 
-            headers.forEach((header, index) => {
+            headers.forEach(
+                (header, index) => {
 
-                object[header] =
-                    (row[index] || "").trim();
-
-            });
+                    object[header] =
+                        (row[index] || "").trim();
+                }
+            );
 
             return object;
-
         });
-
 }
 
 
 // =====================================================
-// 6. MEMBUAT TREE
+// RENDER TREE
 // =====================================================
 
 function renderTree(data) {
 
     const container =
-        document.getElementById("treeContainer");
+        document.getElementById(
+            "treeContainer"
+        );
 
     container.innerHTML = "";
 
-
-    if (data.length === 0) {
-
-        container.innerHTML =
-            '<div class="error">Tidak ada data.</div>';
-
-        return;
-
-    }
-
-
-    // ---------------------------------------------
-    // Membuat index berdasarkan ID
-    // ---------------------------------------------
-
-    const byId = {};
-
-    data.forEach(item => {
-
-        byId[item["ID"]] = item;
-
-    });
-
-
-    // ---------------------------------------------
-    // Membuat root
-    // ---------------------------------------------
-
-    const root = document.createElement("div");
+    const root =
+        document.createElement("div");
 
     root.className = "tree";
 
+    // ROOT
+    const rootNode =
+        document.createElement("div");
 
-    const rootNode = document.createElement("div");
-
-    rootNode.className = "node root";
+    rootNode.className =
+        "node root";
 
     rootNode.innerHTML = `
         <span class="icon">−</span>
+
         <div>
-            <strong>Direktorat Jenderal Perimbangan Keuangan</strong>
-            <small>Tree View Uraian Jabatan</small>
+            <strong>
+                Direktorat Jenderal
+                Perimbangan Keuangan
+            </strong>
+
+            <small>
+                Tree View Uraian Jabatan
+            </small>
         </div>
     `;
-
 
     root.appendChild(rootNode);
 
 
-    // ---------------------------------------------
-    // Data Level 1
-    // ---------------------------------------------
-
+    // LEVEL 1
     const level1 =
         data.filter(item =>
             String(item["Lv"]).trim() === "1"
         );
 
-
     const level1Container =
         document.createElement("div");
 
-    level1Container.className = "children";
+    level1Container.className =
+        "children";
 
 
     level1.forEach(item => {
@@ -263,22 +252,18 @@ function renderTree(data) {
     });
 
 
-    root.appendChild(level1Container);
+    root.appendChild(
+        level1Container
+    );
 
     container.appendChild(root);
 
-
-    // ---------------------------------------------
-    // Aktifkan pencarian
-    // ---------------------------------------------
-
     setupSearch();
-
 }
 
 
 // =====================================================
-// 7. MEMBUAT NODE
+// CREATE NODE
 // =====================================================
 
 function createNode(item, allData) {
@@ -286,50 +271,68 @@ function createNode(item, allData) {
     const branch =
         document.createElement("div");
 
-    branch.className = "branch";
+    branch.className =
+        "branch";
 
 
+    // NODE
     const node =
         document.createElement("div");
 
-    node.className = "node unit";
-
-    node.dataset.search =
-        `${item["Unit"]} ${item["Kelompok Tugas"]} ${item["Uraian Jabatan"]} ${item["Hasil Kerja"]}`.toLowerCase();
+    node.className =
+        "node unit";
 
 
+    node.dataset.search = `
+        ${item["Unit"] || ""}
+        ${item["Kelompok Tugas"] || ""}
+        ${item["Uraian Jabatan"] || ""}
+        ${item["Hasil Kerja"] || ""}
+    `.toLowerCase();
+
+
+    // ICON
     const icon =
         document.createElement("span");
 
-    icon.className = "icon";
+    icon.className =
+        "icon";
 
     icon.textContent = "+";
 
 
+    // CONTENT
     const content =
         document.createElement("div");
 
-
     content.innerHTML = `
-        <strong>${escapeHTML(item["Unit"])}</strong>
+        <strong>
+            ${escapeHTML(item["Unit"] || "-")}
+        </strong>
+
         <small>
-            ID: ${escapeHTML(item["ID"])}
-            ${item["Kelompok Tugas"]
-                ? " | " + escapeHTML(item["Kelompok Tugas"])
-                : ""}
+            ID:
+            ${escapeHTML(item["ID"] || "-")}
+
+            ${
+                item["Kelompok Tugas"]
+                ?
+                " | " +
+                escapeHTML(
+                    item["Kelompok Tugas"]
+                )
+                :
+                ""
+            }
         </small>
     `;
 
 
     node.appendChild(icon);
-
     node.appendChild(content);
 
 
-    // ---------------------------------------------
-    // Container anak
-    // ---------------------------------------------
-
+    // CHILDREN
     const children =
         document.createElement("div");
 
@@ -337,38 +340,31 @@ function createNode(item, allData) {
         "children hidden";
 
 
-    // ---------------------------------------------
-    // Cari anak berdasarkan Parent-ID
-    // ---------------------------------------------
-
     const childItems =
         allData.filter(child =>
-            child["Parent-ID"] === item["ID"]
+            String(child["Parent-ID"]).trim() ===
+            String(item["ID"]).trim()
         );
 
-
-    // ---------------------------------------------
-    // Tambahkan child
-    // ---------------------------------------------
 
     childItems.forEach(child => {
 
         children.appendChild(
-            createNode(child, allData)
+            createNode(
+                child,
+                allData
+            )
         );
 
     });
 
 
-    // ---------------------------------------------
-    // Tambahkan uraian jabatan
-    // ---------------------------------------------
-
+    // TASK DETAIL
     const task =
         document.createElement("div");
 
-    task.className = "task";
-
+    task.className =
+        "task";
 
     task.innerHTML = `
 
@@ -377,7 +373,11 @@ function createNode(item, allData) {
         </div>
 
         <div class="task-description">
-            ${formatText(item["Uraian Jabatan"])}
+            ${
+                formatText(
+                    item["Uraian Jabatan"]
+                )
+            }
         </div>
 
         <div class="output-title">
@@ -385,7 +385,11 @@ function createNode(item, allData) {
         </div>
 
         <div class="output">
-            ${formatText(item["Hasil Kerja"])}
+            ${
+                formatText(
+                    item["Hasil Kerja"]
+                )
+            }
         </div>
 
         ${
@@ -393,7 +397,9 @@ function createNode(item, allData) {
             ?
             `
             <div class="note">
-                ${formatText(item["Keterangan"])}
+                ${formatText(
+                    item["Keterangan"]
+                )}
             </div>
             `
             :
@@ -403,55 +409,51 @@ function createNode(item, allData) {
     `;
 
 
-    // ---------------------------------------------
-    // Masukkan task ke children
-    // ---------------------------------------------
-
     children.insertBefore(
         task,
         children.firstChild
     );
 
 
-    // ---------------------------------------------
-    // Tombol expand/collapse
-    // ---------------------------------------------
+    // CLICK
+    node.addEventListener(
+        "click",
+        function () {
 
-    node.addEventListener("click", function () {
+            if (
+                children.classList.contains(
+                    "hidden"
+                )
+            ) {
 
-        if (
-            children.classList.contains("hidden")
-        ) {
+                children.classList.remove(
+                    "hidden"
+                );
 
-            children.classList.remove("hidden");
+                icon.textContent = "−";
 
-            icon.textContent = "−";
+            } else {
+
+                children.classList.add(
+                    "hidden"
+                );
+
+                icon.textContent = "+";
+            }
 
         }
-
-        else {
-
-            children.classList.add("hidden");
-
-            icon.textContent = "+";
-
-        }
-
-    });
+    );
 
 
     branch.appendChild(node);
-
     branch.appendChild(children);
 
-
     return branch;
-
 }
 
 
 // =====================================================
-// 8. FORMAT TEXT
+// FORMAT TEXT
 // =====================================================
 
 function formatText(text) {
@@ -466,7 +468,7 @@ function formatText(text) {
 
 
 // =====================================================
-// 9. KEAMANAN HTML
+// SECURITY
 // =====================================================
 
 function escapeHTML(text) {
@@ -477,12 +479,11 @@ function escapeHTML(text) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
 }
 
 
 // =====================================================
-// 10. EXPAND ALL
+// EXPAND ALL
 // =====================================================
 
 function expandAll() {
@@ -491,10 +492,11 @@ function expandAll() {
         .querySelectorAll(".children")
         .forEach(element => {
 
-            element.classList.remove("hidden");
+            element.classList.remove(
+                "hidden"
+            );
 
         });
-
 
     document
         .querySelectorAll(".icon")
@@ -503,12 +505,11 @@ function expandAll() {
             icon.textContent = "−";
 
         });
-
 }
 
 
 // =====================================================
-// 11. COLLAPSE ALL
+// COLLAPSE ALL
 // =====================================================
 
 function collapseAll() {
@@ -517,10 +518,11 @@ function collapseAll() {
         .querySelectorAll(".children")
         .forEach(element => {
 
-            element.classList.add("hidden");
+            element.classList.add(
+                "hidden"
+            );
 
         });
-
 
     document
         .querySelectorAll(".icon")
@@ -529,19 +531,19 @@ function collapseAll() {
             icon.textContent = "+";
 
         });
-
 }
 
 
 // =====================================================
-// 12. SEARCH
+// SEARCH
 // =====================================================
 
 function setupSearch() {
 
     const searchBox =
-        document.getElementById("searchBox");
-
+        document.getElementById(
+            "searchBox"
+        );
 
     if (!searchBox) {
         return;
@@ -553,7 +555,9 @@ function setupSearch() {
         function () {
 
             const keyword =
-                searchBox.value.toLowerCase();
+                searchBox.value
+                    .toLowerCase()
+                    .trim();
 
 
             document
@@ -561,27 +565,25 @@ function setupSearch() {
                 .forEach(branch => {
 
                     const text =
-                        branch.innerText.toLowerCase();
-
+                        branch.innerText
+                            .toLowerCase();
 
                     if (
                         keyword === "" ||
                         text.includes(keyword)
                     ) {
 
-                        branch.style.display = "";
+                        branch.style.display =
+                            "";
 
-                    }
+                    } else {
 
-                    else {
-
-                        branch.style.display = "none";
-
+                        branch.style.display =
+                            "none";
                     }
 
                 });
 
         }
     );
-
 }
