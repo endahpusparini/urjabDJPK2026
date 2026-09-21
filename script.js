@@ -8,7 +8,7 @@
 // 1. MASUKKAN GOOGLE SHEET ID DI SINI
 // =====================================================
 
-const SHEET_ID = "MASUKKAN_ID_GOOGLE_SHEET_ANDA";
+const SHEET_ID = "e/2PACX-1vRnqIAvEqNOyIMtJAe3gbqKWF8eJe_LSDZOJtSfloFLLv4rkGPyx6Lc1AQEazEV-ZmpR6MJ7dNdfs4J";
 
 const SHEET_NAME = "URJAB";
 
