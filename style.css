@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tree View Uraian Tugas DJPK</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Tree View Uraian Tugas DJPK</h1>
+        <p>Direktorat Jenderal Perimbangan Keuangan</p>
+    </header>
+
+    <div class="toolbar">
+
+        <button onclick="expandAll()">
+            Expand All
+        </button>
+
+        <button onclick="collapseAll()">
+            Collapse All
+        </button>
+
+        <input
+            type="text"
+            id="searchBox"
+            placeholder="Cari uraian tugas..."
+            onkeyup="searchTask()"
+        >
+
+    </div>
+
+    <main>
+
+        <!-- ROOT -->
+
+        <div class="tree">
+
+            <div class="node root">
+                Direktur Jenderal Perimbangan Keuangan
+            </div>
+
+            <div class="children">
+
+                <!-- DTU -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat Dana Transfer Umum
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat Dana Transfer Umum.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen/kebijakan
+                            </span>
+                        </div>
+
+                        <div class="task">
+                            <strong>Tugas 2</strong>
+                            <p>
+                                Pelaksanaan tugas dan fungsi sesuai
+                                ketentuan peraturan perundang-undangan.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Laporan
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DTK -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat Dana Transfer Khusus
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat Dana Transfer Khusus.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen/kebijakan
+                            </span>
+                        </div>
+
+                        <div class="task">
+                            <strong>Tugas 2</strong>
+                            <p>
+                                Pelaksanaan tugas dan fungsi Direktorat.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Laporan
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DDIOKK -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat DDIOKK
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat DDIOKK.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PDRD -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat Pajak Daerah dan Retribusi Daerah
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat PDRD.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- P2D -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat Pembiayaan dan Perekonomian Daerah
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat P2D.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SPK -->
+
+                <div class="branch">
+
+                    <div class="node unit" onclick="toggle(this)">
+                        <span class="icon">+</span>
+                        Direktorat Sistem Perimbangan Keuangan
+                    </div>
+
+                    <div class="children hidden">
+
+                        <div class="task">
+                            <strong>Tugas 1</strong>
+                            <p>
+                                Uraian tugas Direktorat SPK.
+                            </p>
+                            <span class="output">
+                                Hasil kerja: Dokumen
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
