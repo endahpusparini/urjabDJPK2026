@@ -1,24 +1,9 @@
 // =====================================================
 // TREE VIEW URJAB DJPK
 // Data berasal dari Google Sheets
-// =====================================================
-
-
-// =====================================================
-// 1. MASUKKAN GOOGLE SHEET ID DI SINI
-// =====================================================
-
-const SHEET_ID = "1Ny9Mkmo8smsc_ZrXnubIwuGZoiDIHHrL8OHm8dYjFvU";
-
-const SHEET_NAME = "URJAB";
-
-
-// =====================================================
-// 2. URL GOOGLE SHEETS
-// =====================================================
 
 const DATA_URL =
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRnqIAvEqNOyIMtJAe3gbqKWF8eJe_LSDZOJtSfloFLLv4rkGPyx6Lc1AQEazEV-ZmpR6MJ7dNdfs4J/pub?output=csv";
 
 
 // =====================================================
